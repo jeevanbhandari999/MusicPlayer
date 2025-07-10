@@ -19,7 +19,7 @@ class MusicListWidget extends ConsumerWidget {
     return Expanded(
       child:
           songs.isEmpty
-              ? const Center(child: Text('No songs found'))
+              ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
                 itemCount: songs.length,
                 itemBuilder: (context, index) {

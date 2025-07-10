@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:music_player/controllers/shuffle_order_loop_controller.dart';
 import 'package:music_player/providers/music_player_provider.dart';
 import 'package:music_player/services/audio_service.dart';
+import 'package:music_player/widgets/music_list.dart';
 
 class PlaybackControls extends ConsumerWidget {
   final AudioService audioService;
 
-  const PlaybackControls({super.key, required this.audioService});
+  PlaybackControls({super.key, required this.audioService});
+  final ShuffleOrderLoopController optionsController =
+      Get.find<ShuffleOrderLoopController>();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,10 +25,36 @@ class PlaybackControls extends ConsumerWidget {
         children: [
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withAlpha(50),
-              borderRadius: BorderRadius.circular(12),
+            // decoration: BoxDecoration(
+            //   color: Theme.of(context).colorScheme.primary.withAlpha(50),
+            //   borderRadius: BorderRadius.circular(12),
+            // ),
+            child: IconButton(
+              icon: Obx(
+                () => Icon(
+                  optionsController.isOrder
+                      ? Icons.format_list_numbered
+                      : optionsController.isShuffle
+                      ? Icons.shuffle
+                      : Icons.repeat_one,
+                  color: Colors.green,
+                ),
+              ),
+              onPressed: () {
+                optionsController.updateOptions();
+              },
+              iconSize: 36,
+              padding: const EdgeInsets.all(12),
+              splashRadius: 24,
+              tooltip: 'Shuffle',
             ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            // decoration: BoxDecoration(
+            //   color: Theme.of(context).colorScheme.primary.withAlpha(50),
+            //   borderRadius: BorderRadius.circular(12),
+            // ),
             child: IconButton(
               icon: const Icon(Icons.skip_previous, color: Colors.green),
               onPressed: audioService.playPrevious,
@@ -71,17 +102,41 @@ class PlaybackControls extends ConsumerWidget {
           ),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withAlpha(50),
-              borderRadius: BorderRadius.circular(12),
-            ),
+            // decoration: BoxDecoration(
+            //   color: Theme.of(context).colorScheme.primary.withAlpha(50),
+            //   borderRadius: BorderRadius.circular(12),
+            // ),
             child: IconButton(
               icon: const Icon(Icons.skip_next, color: Colors.green),
-              onPressed: audioService.playNext,
+              onPressed: () {
+                audioService.playNext();
+                // audioService.playNext();
+              },
               iconSize: 36,
               padding: const EdgeInsets.all(12),
               splashRadius: 24,
               tooltip: 'Next',
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            // decoration: BoxDecoration(
+            //   color: Theme.of(context).colorScheme.primary.withAlpha(50),
+            //   borderRadius: BorderRadius.circular(12),
+            // ),
+            child: IconButton(
+              icon: const Icon(Icons.queue_music, color: Colors.green),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: RoundedRectangleBorder(),
+                  builder: (ctx) => MusicListWidget(audioService: audioService),
+                );
+              },
+              iconSize: 36,
+              padding: const EdgeInsets.all(12),
+              splashRadius: 24,
+              tooltip: 'Musics',
             ),
           ),
         ],

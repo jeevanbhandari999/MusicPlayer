@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:get/get.dart';
+// import 'package:music_player/controllers/music_player_controller.dart';
 import 'package:music_player/providers/music_player_provider.dart';
 import 'package:music_player/screens/play_song_screen.dart';
 import 'package:music_player/services/audio_service.dart';
@@ -9,6 +11,8 @@ class FloatingMusicWidget extends ConsumerWidget {
   final AudioService audioService;
 
   const FloatingMusicWidget({super.key, required this.audioService});
+  // final MusicPlayerController musicPlayerController =
+  //     Get.find<MusicPlayerController>();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -133,8 +137,10 @@ class FloatingMusicWidget extends ConsumerWidget {
                               key: ValueKey<bool>(isPlaying),
                             ),
                           ),
-                          onPressed:
-                              () => audioService.playSong(currentSongIndex),
+                          onPressed: () {
+                            // musicPlayerController.playSong(currentSongIndex);
+                            audioService.playSong(currentSongIndex);
+                          },
                           iconSize: 28,
                           padding: const EdgeInsets.all(8),
                           splashRadius: 20,

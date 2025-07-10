@@ -74,7 +74,9 @@ class SongOptionsModal extends ConsumerWidget {
                     context,
                     icon: Icons.delete,
                     label: 'Delete',
-                    onTap: () {},
+                    onTap: () {
+                      audioService.deleteSong(song.id);
+                    },
                   ),
                   _buildOption(
                     context,

@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:music_player/controllers/image_picker_controller.dart';
 import 'package:music_player/services/audio_service.dart';
 import 'package:music_player/providers/music_player_provider.dart';
 import 'package:music_player/widgets/playback_controls.dart';
@@ -24,6 +28,7 @@ class PlaySongScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final song = songs[currentSongIndex];
+    final imagePickerController = Get.find<ImagePickerController>();
 
     return Scaffold(
       appBar: AppBar(title: Text(song.title)),
@@ -43,19 +48,20 @@ class PlaySongScreen extends ConsumerWidget {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
+
                         children: [
                           Text(
-                            _formatDuration(position),
+                            '${_formatDuration(position)} | ',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 18,
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                          SizedBox(width: 10),
+
                           Text(
                             _formatDuration(duration),
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 18,
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
@@ -80,8 +86,8 @@ class PlaySongScreen extends ConsumerWidget {
                             dotColor: Colors.white,
                           ),
                           size: 400,
-                          angleRange: 360,
-                          startAngle: 270,
+                          angleRange: 320,
+                          startAngle: 290,
                         ),
                         min: 0,
                         max:
@@ -89,37 +95,54 @@ class PlaySongScreen extends ConsumerWidget {
                                 ? duration.inSeconds.toDouble()
                                 : 1.0,
                         initialValue: position.inSeconds.toDouble(),
-                        onChange: (double value) async {
+                        onChange: (value) async {
                           await audioService.audioPlayer.seek(
                             Duration(seconds: value.toInt()),
                           );
                         },
                         innerWidget:
                             (_) => Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(360),
-                                child: QueryArtworkWidget(
-                                  id: currentSongIndex,
-                                  type: ArtworkType.AUDIO,
-                                  artworkWidth: 360,
-                                  artworkHeight: 360,
-                                  artworkFit: BoxFit.cover,
-                                  keepOldArtwork: true,
-                                  nullArtworkWidget: Container(
-                                    width: 360,
-                                    height: 360,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary.withAlpha(60),
-                                    ),
-                                    child: const Icon(
-                                      Icons.music_note,
-                                      size: 80,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
+                              child: FutureBuilder<Map<int, String>>(
+                                future:
+                                    imagePickerController.loadCustomArtworks(),
+                                builder: (context, snapshot) {
+                                  final customArtworkPath =
+                                      snapshot.data?[song.id];
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(360),
+                                    child:
+                                        customArtworkPath != null
+                                            ? Image.file(
+                                              File(customArtworkPath),
+                                              width: 360,
+                                              height: 360,
+                                              fit: BoxFit.cover,
+                                            )
+                                            : QueryArtworkWidget(
+                                              id: song.id,
+                                              type: ArtworkType.AUDIO,
+                                              artworkWidth: 360,
+                                              artworkHeight: 360,
+                                              artworkFit: BoxFit.cover,
+                                              keepOldArtwork: true,
+                                              nullArtworkWidget: Container(
+                                                width: 360,
+                                                height: 360,
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary
+                                                      .withAlpha(60),
+                                                ),
+                                                child: const Icon(
+                                                  Icons.music_note,
+                                                  size: 80,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                  );
+                                },
                               ),
                             ),
                       ),
@@ -155,6 +178,38 @@ class PlaySongScreen extends ConsumerWidget {
             },
           ),
           PlaybackControls(audioService: audioService),
+          const SizedBox(height: 20),
+          // Additional Controls with Image Picker
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     IconButton(
+          //       icon: Icon(Icons.repeat, color: Colors.grey[400], size: 24),
+          //       onPressed: () {},
+          //     ),
+          //     IconButton(
+          //       icon: Icon(
+          //         Icons.favorite_border,
+          //         color: Colors.grey[400],
+          //         size: 24,
+          //       ),
+          //       onPressed: () {},
+          //     ),
+          //     IconButton(
+          //       icon: Icon(Icons.edit, color: Colors.grey[400], size: 24),
+          //       onPressed: () async {
+          //         await imagePickerController.pickImage();
+          //         if (imagePickerController.pickedImage != null) {
+          //           await imagePickerController.saveArtworkForSong(song.id);
+          //         }
+          //       },
+          //     ),
+          //     IconButton(
+          //       icon: Icon(Icons.close, color: Colors.grey[400], size: 24),
+          //       onPressed: () => Navigator.pop(context),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
